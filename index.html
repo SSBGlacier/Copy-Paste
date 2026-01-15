@@ -1,119 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Copy & Paste</title>
-  <link rel="icon" href="favicon.ico">
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      background: #121212;
-      color: #e0e0e0;
-    }
+<script>
+  // Save all snippets to cookies
+  function saveSnippets() {
+    const snippets = [];
+    document.querySelectorAll("#list .snippet span").forEach(span => {
+      snippets.push(span.textContent);
+    });
+    // Save as JSON string, expires in 7 days
+    document.cookie = `snippets=${encodeURIComponent(JSON.stringify(snippets))}; max-age=${7*24*60*60}; path=/`;
+  }
 
-    textarea {
-      width: 100%;
-      height: 80px;
-      background: #1e1e1e;
-      color: #fff;
-      border: 1px solid #333;
-      padding: 10px;
-      resize: vertical;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
+  // Load snippets from cookies
+  function loadSnippets() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('snippets='));
+    if (!cookie) return;
+    const snippets = JSON.parse(decodeURIComponent(cookie.split('=')[1]));
+    snippets.forEach(text => createSnippetElement(text));
+  }
 
-    button {
-      background: #2a2a2a;
-      color: #fff;
-      border: 1px solid #444;
-      padding: 6px 10px;
-      cursor: pointer;
-      border-radius: 8px;
-      font-size: 14px;
-    }
+  // Create a snippet element (used for add and load)
+  function createSnippetElement(text) {
+    const div = document.createElement("div");
+    div.className = "snippet";
 
-    button:hover {
-      background: #3a3a3a;
-    }
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.className = "icon-btn";
+    deleteBtn.title = "Delete";
+    deleteBtn.onclick = () => {
+      div.remove();
+      saveSnippets();
+    };
 
-    #list {
-      width: 100%;
-      box-sizing: border-box;
-    }
+    const span = document.createElement("span");
+    span.textContent = text;
 
-    .snippet {
-      border: 1px solid #333;
-      background: #1a1a1a;
-      padding: 10px;
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-radius: 10px;
-      width: 100%;
-      box-sizing: border-box;
-    }
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy";
+    copyBtn.onclick = () => navigator.clipboard.writeText(text);
 
-    .snippet span {
-      flex: 1 1 auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    div.appendChild(deleteBtn);
+    div.appendChild(span);
+    div.appendChild(copyBtn);
 
-    .icon-btn {
-      padding: 6px 8px;
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
+    document.getElementById("list").appendChild(div);
+  }
 
-  <h2>Copy & Paste</h2>
-  <textarea id="input" placeholder="Input text here..."></textarea>
-  <br><br>
-  <button onclick="addSnippet()">Add</button>
+  // Add snippet from textarea
+  function addSnippet() {
+    const text = document.getElementById("input").value.trim();
+    if (!text) return;
+    createSnippetElement(text);
+    document.getElementById("input").value = "";
+    saveSnippets();
+  }
 
-  <div id="list"></div>
-
-  <script>
-    function addSnippet() {
-      const text = document.getElementById("input").value.trim();
-      if (!text) return;
-
-      const div = document.createElement("div");
-      div.className = "snippet";
-
-      // Trash icon on left
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️";
-      deleteBtn.className = "icon-btn";
-      deleteBtn.title = "Delete";
-      deleteBtn.onclick = () => div.remove();
-
-      // Snippet text
-      const span = document.createElement("span");
-      span.textContent = text;
-
-      // Copy button
-      const copyBtn = document.createElement("button");
-      copyBtn.textContent = "Copy";
-      copyBtn.onclick = () => navigator.clipboard.writeText(text);
-
-      div.appendChild(deleteBtn);
-      div.appendChild(span);
-      div.appendChild(copyBtn);
-
-      // Add snippet to the bottom
-      document.getElementById("list").appendChild(div);
-
-      document.getElementById("input").value = "";
-    }
-  </script>
-
-</body>
-</html>
-
+  // Load snippets on page load
+  window.onload = loadSnippets;
+</script>
