@@ -80,40 +80,25 @@
   <div id="list"></div>
 
   <script>
-    // Save all snippets to cookies
-    function saveSnippets() {
-      const snippets = [];
-      document.querySelectorAll("#list .snippet span").forEach(span => {
-        snippets.push(span.textContent);
-      });
-      document.cookie = `snippets=${encodeURIComponent(JSON.stringify(snippets))}; max-age=${7*24*60*60}; path=/`;
-    }
+    function addSnippet() {
+      const text = document.getElementById("input").value.trim();
+      if (!text) return;
 
-    // Load snippets from cookies
-    function loadSnippets() {
-      const cookie = document.cookie.split('; ').find(row => row.startsWith('snippets='));
-      if (!cookie) return;
-      const snippets = JSON.parse(decodeURIComponent(cookie.split('=')[1]));
-      snippets.forEach(text => createSnippetElement(text));
-    }
-
-    // Create a snippet element (used for add and load)
-    function createSnippetElement(text) {
       const div = document.createElement("div");
       div.className = "snippet";
 
+      // Trash icon on left
       const deleteBtn = document.createElement("button");
       deleteBtn.textContent = "🗑️";
       deleteBtn.className = "icon-btn";
       deleteBtn.title = "Delete";
-      deleteBtn.onclick = () => {
-        div.remove();
-        saveSnippets();
-      };
+      deleteBtn.onclick = () => div.remove();
 
+      // Snippet text
       const span = document.createElement("span");
       span.textContent = text;
 
+      // Copy button
       const copyBtn = document.createElement("button");
       copyBtn.textContent = "Copy";
       copyBtn.onclick = () => navigator.clipboard.writeText(text);
@@ -122,20 +107,11 @@
       div.appendChild(span);
       div.appendChild(copyBtn);
 
+      // Add snippet to the bottom
       document.getElementById("list").appendChild(div);
-    }
 
-    // Add snippet from textarea
-    function addSnippet() {
-      const text = document.getElementById("input").value.trim();
-      if (!text) return;
-      createSnippetElement(text);
       document.getElementById("input").value = "";
-      saveSnippets();
     }
-
-    // Load snippets on page load
-    window.onload = loadSnippets;
   </script>
 
 </body>
