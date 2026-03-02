@@ -79,40 +79,74 @@
 
   <div id="list"></div>
 
-  <script>
-    function addSnippet() {
-      const text = document.getElementById("input").value.trim();
-      if (!text) return;
+<script>
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + "=" + encodeURIComponent(value) + "; expires=" + expires + "; path=/";
+  }
 
-      const div = document.createElement("div");
-      div.className = "snippet";
+  function getCookie(name) {
+    return document.cookie.split("; ").reduce((r, v) => {
+      const parts = v.split("=");
+      return parts[0] === name ? decodeURIComponent(parts[1]) : r
+    }, "");
+  }
 
-      // Trash icon on left
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "🗑️";
-      deleteBtn.className = "icon-btn";
-      deleteBtn.title = "Delete";
-      deleteBtn.onclick = () => div.remove();
+  function saveSnippets() {
+    const snippets = [];
+    document.querySelectorAll(".snippet span").forEach(span => {
+      snippets.push(span.textContent);
+    });
+    setCookie("snippets", JSON.stringify(snippets), 365);
+  }
 
-      // Snippet text
-      const span = document.createElement("span");
-      span.textContent = text;
+  function loadSnippets() {
+    const data = getCookie("snippets");
+    if (!data) return;
 
-      // Copy button
-      const copyBtn = document.createElement("button");
-      copyBtn.textContent = "Copy";
-      copyBtn.onclick = () => navigator.clipboard.writeText(text);
+    const snippets = JSON.parse(data);
+    snippets.forEach(text => createSnippet(text));
+  }
 
-      div.appendChild(deleteBtn);
-      div.appendChild(span);
-      div.appendChild(copyBtn);
+  function createSnippet(text) {
+    const div = document.createElement("div");
+    div.className = "snippet";
 
-      // Add snippet to the bottom
-      document.getElementById("list").appendChild(div);
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "🗑️";
+    deleteBtn.className = "icon-btn";
+    deleteBtn.title = "Delete";
+    deleteBtn.onclick = () => {
+      div.remove();
+      saveSnippets();
+    };
 
-      document.getElementById("input").value = "";
-    }
-  </script>
+    const span = document.createElement("span");
+    span.textContent = text;
+
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy";
+    copyBtn.onclick = () => navigator.clipboard.writeText(text);
+
+    div.appendChild(deleteBtn);
+    div.appendChild(span);
+    div.appendChild(copyBtn);
+
+    document.getElementById("list").appendChild(div);
+  }
+
+  function addSnippet() {
+    const text = document.getElementById("input").value.trim();
+    if (!text) return;
+
+    createSnippet(text);
+    document.getElementById("input").value = "";
+    saveSnippets();
+  }
+
+  // Load saved snippets on page load
+  window.onload = loadSnippets;
+</script>
 
 </body>
 </html>
