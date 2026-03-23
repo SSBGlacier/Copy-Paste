@@ -68,6 +68,27 @@
       padding: 6px 8px;
       font-size: 16px;
     }
+
+    /* ✅ POPUP STYLE */
+    #popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    #popup.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -78,6 +99,9 @@
   <button onclick="addSnippet()">Add</button>
 
   <div id="list"></div>
+
+  <!-- ✅ POPUP ELEMENT -->
+  <div id="popup">Copied!</div>
 
 <script>
   function setCookie(name, value, days) {
@@ -108,6 +132,15 @@
     snippets.forEach(text => createSnippet(text));
   }
 
+  function showPopup() {
+    const popup = document.getElementById("popup");
+    popup.classList.add("show");
+
+    setTimeout(() => {
+      popup.classList.remove("show");
+    }, 1500);
+  }
+
   function createSnippet(text) {
     const div = document.createElement("div");
     div.className = "snippet";
@@ -126,7 +159,10 @@
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
-    copyBtn.onclick = () => navigator.clipboard.writeText(text);
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      showPopup(); // ✅ triggers popup
+    };
 
     div.appendChild(deleteBtn);
     div.appendChild(span);
@@ -150,4 +186,3 @@
 
 </body>
 </html>
-
